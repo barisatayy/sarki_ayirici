@@ -8,7 +8,7 @@ Tamamen yerel, açık kaynaklı ve donanım hızlandırmalı (NVIDIA CUDA) müzi
 
 - **100% Yerel & Çevrimdışı**: Hiçbir harici API veya bulut servisine bağlanmaz, internet kotası harcamaz.
 - **CUDA Hızlandırma**: NVIDIA GPU (Tensor çekirdekleri) ile 3-4 dakikalık bir şarkıyı ortalama **20-30 saniyede** ayırır.
-- **Yüksek Kalite Çıktı**: Stüdyo ve FL Studio için hazır **320kbps MP3** formatında çıktı üretir.
+- **Yüksek Kalite Çıktı**: Yüksek çözünürlüklü **320kbps MP3** formatında çıktı üretir.
 - **Otomatik Model Seçimi**: Seçtiğiniz ayrıştırma hedefine göre en uygun Meta AI Demucs v4 modelini (`htdemucs_ft` veya `htdemucs_6s`) otomatik olarak belirler:
   -  **Vokal & Altyapı (2 Kanal)**: Şarkıyı Vokal (Acapella) ve temiz Altyapı olarak ayırır.
   -  **Sadece Davul / Bateri Çıkar (2 Kanal)**: Davul ritimleri ve davulsuz altyapı.
