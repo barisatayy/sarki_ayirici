@@ -1,6 +1,15 @@
-﻿@echo off
+@echo off
 chcp 65001 >nul
 cd /d "%~dp0"
+
+if not exist "backend\app.py" (
+    if exist "%~dp0sarki_ayirici\backend\app.py" (
+        cd /d "%~dp0sarki_ayirici"
+    ) else if exist "C:\Users\tobil\Desktop\sarki_ayirici\backend\app.py" (
+        cd /d "C:\Users\tobil\Desktop\sarki_ayirici"
+    )
+)
+
 title Lokal Muzik Ayristirma Studyosu (RTX 3070 CUDA)
 
 echo ========================================================
