@@ -65,7 +65,7 @@ function renderTargets() {
         card.dataset.key = key;
 
         // Model tag name
-        const modelTag = item.model === "htdemucs_6s" ? "6-Stem AI" : "Fine-Tuned AI";
+        const modelTag = item.model === "htdemucs_6s" ? "6-Kanal AI" : "Fine-Tuned AI";
 
         card.innerHTML = `
             <div>
@@ -74,7 +74,7 @@ function renderTargets() {
                 </div>
                 <p class="target-desc">${item.description}</p>
             </div>
-            <span class="target-tag">${modelTag} • FL Studio Kalitesi</span>
+            <span class="target-tag">${modelTag} • 320kbps MP3</span>
         `;
 
         card.addEventListener("click", () => {
@@ -101,10 +101,10 @@ function updateAutoModelBanner() {
 
     if (item.model === "htdemucs_6s") {
         autoModelName.textContent = "Otomatik Model: Demucs v4 6S (Altı Kanal Derin Öğrenme)";
-        autoModelDesc.textContent = "Piyano ve gitarı diğer enstrümanlardan ayırmak için özel eğitilmiş 6 kanallı model devrede. 32-bit float hassasiyetle FL Studio'ya hazır.";
+        autoModelDesc.textContent = "Piyano ve gitarı diğer enstrümanlardan ayırmak için özel eğitilmiş 6 kanallı model devrede.";
     } else {
         autoModelName.textContent = "Otomatik Model: Demucs v4 FT (İnce Ayarlı Fine-Tuned)";
-        autoModelDesc.textContent = "Vokal, davul, bas ve altyapı için Meta'nın en yüksek akustik ayrım hassasiyetine sahip stüdyo modeli. 32-bit float ses çıkışı.";
+        autoModelDesc.textContent = "Vokal, davul, bas ve altyapı için en yüksek akustik ayrım hassasiyetine sahip model devrede.";
     }
 }
 
@@ -288,14 +288,13 @@ function renderStems(job) {
 
     Object.keys(stems).forEach(stemKey => {
         const stemData = stems[stemKey];
-        const info = stemsInfo[stemKey] || { label: stemKey.toUpperCase(), icon: "🎵" };
+        const info = stemsInfo[stemKey] || { label: stemKey.toUpperCase() };
 
         const card = document.createElement("div");
         card.className = "stem-card";
 
         card.innerHTML = `
             <div class="stem-info">
-                <span class="stem-icon">${info.icon}</span>
                 <div class="stem-names">
                     <span class="stem-label">${info.label}</span>
                     <span class="stem-sub">${(stemData.extension || '.mp3').toUpperCase()} (320kbps) • ${formatBytes(stemData.file_size)}</span>
@@ -308,7 +307,7 @@ function renderStems(job) {
 
             <div class="stem-actions">
                 <button class="btn-save-stem" data-stem="${stemKey}" title="Bu kanalı masaüstüne kaydet">
-                    <span>💾</span> Masaüstüne Kaydet
+                    Masaüstüne Kaydet
                 </button>
             </div>
         `;

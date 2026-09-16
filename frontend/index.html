@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lokal Müzik Ayrıştırma Stüdyosu | FL Studio Uyumlu</title>
+    <title>Şarkı Ayrıştırıcı</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -23,14 +23,12 @@
                 <div class="drop-zone" id="dropZone">
                     <input type="file" id="fileInput" accept="audio/*" class="file-input">
                     <div class="drop-zone-content">
-                        <div class="upload-icon">🎵</div>
                         <p class="drop-prompt">Şarkıyı buraya sürükleyip bırakın veya <span>dosya seçin</span></p>
                         <p class="drop-hint">MP3, WAV, FLAC, M4A, OGG, AAC desteklenir</p>
                     </div>
                 </div>
 
                 <div class="selected-file-card" id="selectedFileCard" style="display: none;">
-                    <div class="file-icon">🎶</div>
                     <div class="file-details">
                         <span class="file-name" id="selectedFileName">sarki.mp3</span>
                         <span class="file-size" id="selectedFileSize">12.4 MB</span>
@@ -45,7 +43,7 @@
                     <div class="step-num">2</div>
                     <div>
                         <h2>Neye Ayrıştırmak İstiyorsunuz?</h2>
-                        <p class="section-desc">Seçiminize göre en güçlü derin öğrenme modeli (Demucs v4 Fine-Tuned / 6S) otomatik seçilir.</p>
+                        <p class="section-desc">Seçiminize göre en güçlü derin öğrenme modeli otomatik seçilir.</p>
                     </div>
                 </div>
 
@@ -55,16 +53,14 @@
 
                 <!-- Auto Model Banner -->
                 <div class="auto-model-info" id="autoModelInfo">
-                    <div class="model-info-icon">🧠</div>
                     <div class="model-info-text">
                         <strong id="autoModelName">Otomatik Model: Demucs v4 FT (Fine-Tuned)</strong>
-                        <p id="autoModelDesc">Test-time augmentation (--shifts=2) ve 32-bit float kalitesiyle FL Studio için en net akustik ayrımı yapar.</p>
+                        <p id="autoModelDesc">Test-time augmentation (--shifts=2) ile en net akustik ayrımı yapar.</p>
                     </div>
                 </div>
 
                 <!-- Action Button -->
                 <button class="btn-start" id="btnStart" disabled>
-                    <span class="btn-icon">⚡</span>
                     <span id="btnStartText">Ayrıştırmayı Başlat</span>
                 </button>
             </section>
@@ -85,7 +81,7 @@
                         <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
                     </div>
                     <div class="progress-note">
-                        <span>💡 Kaliteli ve doğru ayrıştırma için 32-bit hassasiyette işlenmektedir. Süre şarkı uzunluğuna göre 20-40 saniye sürebilir.</span>
+                        <span>Kaliteli ve doğru ayrıştırma için yüksek hassasiyette işlenmektedir. Süre şarkı uzunluğuna göre 20-40 saniye sürebilir.</span>
                     </div>
                 </div>
             </section>
@@ -96,22 +92,21 @@
                     <div class="header-left">
                         <div class="step-num step-success">✓</div>
                         <div>
-                            <h2>Ayrıştırılan Kanallar (FL Studio'ya Hazır)</h2>
+                            <h2>Ayrıştırılan Kanallar</h2>
                             <p class="section-desc">Dosyalar şu an bellekte tutuluyor. Dinleyebilir ve doğrudan Masaüstüne aktarabilirsiniz.</p>
                         </div>
                     </div>
                     <div class="header-actions">
                         <button class="btn btn-save-desktop" id="btnSaveAllDesktop">
-                            <span>📂</span> Tümünü Masaüstüne Kaydet & Klasörü Aç
+                            Tümünü Masaüstüne Kaydet & Klasörü Aç
                         </button>
                         <button class="btn btn-secondary" id="btnResetAll" title="Önbelleği temizle ve yeni şarkı yükle">
-                            <span>🗑️</span> Yeni Şarkı
+                            Yeni Şarkı
                         </button>
                     </div>
                 </div>
 
                 <div class="saved-banner" id="savedBanner" style="display: none;">
-                    <span class="banner-icon">✅</span>
                     <div class="banner-text">
                         <strong>Dosyalar Masaüstüne Kaydedildi:</strong>
                         <span id="savedFolderPath">C:\Users\tobil\Desktop\Sarki_Stems</span>

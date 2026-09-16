@@ -36,8 +36,8 @@ EXTRACTION_TARGETS = {
         "model": "htdemucs_ft",
         "two_stems": "vocals",
         "stems_info": {
-            "vocals": {"label": "Vokal (Acapella)", "icon": "🎙️"},
-            "no_vocals": {"label": "Altyapı (Enstrümantal)", "icon": "🎵"}
+            "vocals": {"label": "Vokal (Acapella)"},
+            "no_vocals": {"label": "Altyapı (Enstrümantal)"}
         }
     },
     "all_4stems": {
@@ -46,10 +46,10 @@ EXTRACTION_TARGETS = {
         "model": "htdemucs_ft",
         "two_stems": None,
         "stems_info": {
-            "vocals": {"label": "Vokal", "icon": "🎙️"},
-            "drums": {"label": "Davul / Bateri", "icon": "🥁"},
-            "bass": {"label": "Bas", "icon": "🎸"},
-            "other": {"label": "Diğer Enstrümanlar (Melodi / Synth)", "icon": "🎹"}
+            "vocals": {"label": "Vokal"},
+            "drums": {"label": "Davul / Bateri"},
+            "bass": {"label": "Bas"},
+            "other": {"label": "Diğer Enstrümanlar (Melodi / Synth)"}
         }
     },
     "drums_only": {
@@ -58,8 +58,8 @@ EXTRACTION_TARGETS = {
         "model": "htdemucs_ft",
         "two_stems": "drums",
         "stems_info": {
-            "drums": {"label": "Davul / Bateri", "icon": "🥁"},
-            "no_drums": {"label": "Davulsuz Altyapı", "icon": "🎵"}
+            "drums": {"label": "Davul / Bateri"},
+            "no_drums": {"label": "Davulsuz Altyapı"}
         }
     },
     "bass_only": {
@@ -68,8 +68,8 @@ EXTRACTION_TARGETS = {
         "model": "htdemucs_ft",
         "two_stems": "bass",
         "stems_info": {
-            "bass": {"label": "Bas Gitar / Synth Bas", "icon": "🎸"},
-            "no_bass": {"label": "Bassız Altyapı", "icon": "🎵"}
+            "bass": {"label": "Bas Gitar / Synth Bas"},
+            "no_bass": {"label": "Bassız Altyapı"}
         }
     },
     "all_6stems": {
@@ -78,12 +78,12 @@ EXTRACTION_TARGETS = {
         "model": "htdemucs_6s",
         "two_stems": None,
         "stems_info": {
-            "vocals": {"label": "Vokal", "icon": "🎙️"},
-            "drums": {"label": "Davul / Bateri", "icon": "🥁"},
-            "bass": {"label": "Bas", "icon": "🎸"},
-            "guitar": {"label": "Gitar", "icon": "🎸"},
-            "piano": {"label": "Piyano", "icon": "🎹"},
-            "other": {"label": "Diğer Enstrümanlar", "icon": "✨"}
+            "vocals": {"label": "Vokal"},
+            "drums": {"label": "Davul / Bateri"},
+            "bass": {"label": "Bas"},
+            "guitar": {"label": "Gitar"},
+            "piano": {"label": "Piyano"},
+            "other": {"label": "Diğer Enstrümanlar"}
         }
     },
     "guitar_only": {
@@ -92,8 +92,8 @@ EXTRACTION_TARGETS = {
         "model": "htdemucs_6s",
         "two_stems": "guitar",
         "stems_info": {
-            "guitar": {"label": "Gitar", "icon": "🎸"},
-            "no_guitar": {"label": "Gitarsız Altyapı", "icon": "🎵"}
+            "guitar": {"label": "Gitar"},
+            "no_guitar": {"label": "Gitarsız Altyapı"}
         }
     },
     "piano_only": {
@@ -102,8 +102,8 @@ EXTRACTION_TARGETS = {
         "model": "htdemucs_6s",
         "two_stems": "piano",
         "stems_info": {
-            "piano": {"label": "Piyano / Klavye", "icon": "🎹"},
-            "no_piano": {"label": "Piyanosuz Altyapı", "icon": "🎵"}
+            "piano": {"label": "Piyano / Klavye"},
+            "no_piano": {"label": "Piyanosuz Altyapı"}
         }
     }
 }
