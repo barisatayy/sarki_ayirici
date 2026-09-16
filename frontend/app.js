@@ -1,7 +1,46 @@
+// Default targets for instant zero-latency rendering
+const DEFAULT_TARGETS = {
+    "vocals_inst": {
+        "title": "Vokal ve Altyapı / Enstrümantal (2 Kanal)",
+        "description": "Şarkıyı sadece Vokal ve tertemiz Altyapı olarak ikiye ayırır.",
+        "model": "htdemucs_ft"
+    },
+    "all_4stems": {
+        "title": "Tüm Temel Enstrümanlar & Vokal (4 Kanal)",
+        "description": "Vokal, Davul/Bateri, Bas ve Diğer enstrümanlar (Melodi/Synth).",
+        "model": "htdemucs_ft"
+    },
+    "drums_only": {
+        "title": "Sadece Davul / Bateri Çıkar (2 Kanal)",
+        "description": "Davul ritimlerini ve davulsuz altyapıyı ayırır.",
+        "model": "htdemucs_ft"
+    },
+    "bass_only": {
+        "title": "Sadece Bas Çıkar (2 Kanal)",
+        "description": "Bas hattını (808 / Bassline) ve bassız şarkıyı ayırır.",
+        "model": "htdemucs_ft"
+    },
+    "all_6stems": {
+        "title": "Gitar & Piyano Detaylı (6 Kanal)",
+        "description": "Vokal, Davul, Bas, Gitar, Piyano ve Diğer enstrümanlar.",
+        "model": "htdemucs_6s"
+    },
+    "guitar_only": {
+        "title": "Sadece Gitar Çıkar (2 Kanal)",
+        "description": "Gitar partilerini ve gitarsız altyapıyı ayırır.",
+        "model": "htdemucs_6s"
+    },
+    "piano_only": {
+        "title": "Sadece Piyano Çıkar (2 Kanal)",
+        "description": "Piyano/Klavye partilerini ve piyanosuz altyapıyı ayırır.",
+        "model": "htdemucs_6s"
+    }
+};
+
 // State management
 let selectedFile = null;
 let selectedTargetKey = "vocals_inst";
-let targetsData = {};
+let targetsData = { ...DEFAULT_TARGETS };
 let pollInterval = null;
 
 // DOM Elements
@@ -33,19 +72,29 @@ const savedFolderPath = document.getElementById("savedFolderPath");
 const btnOpenFolder = document.getElementById("btnOpenFolder");
 
 // Initialize application
-document.addEventListener("DOMContentLoaded", async () => {
-    await loadTargets();
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Render immediately so options are NEVER blank on first load
+    renderTargets();
     setupEventListeners();
+
+    // 2. Fetch from backend with retry in background
+    loadTargets();
 });
 
-// Load available targets from server
-async function loadTargets() {
-    try {
-        const res = await fetch("/api/targets");
-        targetsData = await res.json();
-        renderTargets();
-    } catch (err) {
-        console.error("Hedefler yüklenemedi:", err);
+// Load available targets from server with auto-retry
+async function loadTargets(retries = 5) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const res = await fetch("/api/targets");
+            if (res.ok) {
+                targetsData = await res.json();
+                renderTargets();
+                return;
+            }
+        } catch (err) {
+            // Wait 800ms and retry
+            await new Promise(resolve => setTimeout(resolve, 800));
+        }
     }
 }
 
