@@ -1,0 +1,14 @@
+# PyTorch CUDA index: https://download.pytorch.org/whl/cu124
+# Core Demucs & audio processing
+demucs>=4.0.0
+torch
+torchaudio
+soundfile
+numpy
+
+# Web Server & API
+fastapi
+uvicorn[standard]
+python-multipart
+aiofiles
+pydantic

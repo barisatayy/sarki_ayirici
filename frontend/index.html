@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lokal Müzik Ayrıştırma Stüdyosu | FL Studio Uyumlu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-group">
+                <div class="logo-icon">🎚️</div>
+                <div>
+                    <h1 class="logo-title">Lokal Müzik Ayrıştırma Stüdyosu</h1>
+                    <p class="logo-subtitle">Sınırsız • Ücretsiz • Kendi Ekran Kartınızda (CUDA) • 320kbps Yüksek Kalite MP3</p>
+                </div>
+            </div>
+            <div class="header-badges">
+                <div class="badge badge-gpu">
+                    <span class="dot dot-pulse"></span>
+                    <span>NVIDIA RTX 3070 (CUDA Aktif)</span>
+                </div>
+                <div class="badge badge-offline">
+                    <span>%100 Çevrimdışı & Güvenli</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Grid -->
+        <main class="main-content">
+            <!-- Step 1: File Upload -->
+            <section class="card upload-section">
+                <div class="card-header">
+                    <div class="step-num">1</div>
+                    <h2>Şarkı Seçin veya Sürükleyin</h2>
+                </div>
+
+                <div class="drop-zone" id="dropZone">
+                    <input type="file" id="fileInput" accept="audio/*" class="file-input">
+                    <div class="drop-zone-content">
+                        <div class="upload-icon">🎵</div>
+                        <p class="drop-prompt">Şarkıyı buraya sürükleyip bırakın veya <span>dosya seçin</span></p>
+                        <p class="drop-hint">MP3, WAV, FLAC, M4A, OGG, AAC desteklenir</p>
+                    </div>
+                </div>
+
+                <div class="selected-file-card" id="selectedFileCard" style="display: none;">
+                    <div class="file-icon">🎶</div>
+                    <div class="file-details">
+                        <span class="file-name" id="selectedFileName">sarki.mp3</span>
+                        <span class="file-size" id="selectedFileSize">12.4 MB</span>
+                    </div>
+                    <button class="btn-clear" id="btnClearFile" title="Dosyayı kaldır">✕</button>
+                </div>
+            </section>
+
+            <!-- Step 2: Extraction Target Selection -->
+            <section class="card target-section">
+                <div class="card-header">
+                    <div class="step-num">2</div>
+                    <div>
+                        <h2>Neye Ayrıştırmak İstiyorsunuz?</h2>
+                        <p class="section-desc">Seçiminize göre en güçlü derin öğrenme modeli (Demucs v4 Fine-Tuned / 6S) otomatik seçilir.</p>
+                    </div>
+                </div>
+
+                <div class="targets-grid" id="targetsGrid">
+                    <!-- Dynamic Target Cards populated by JS -->
+                </div>
+
+                <!-- Auto Model Banner -->
+                <div class="auto-model-info" id="autoModelInfo">
+                    <div class="model-info-icon">🧠</div>
+                    <div class="model-info-text">
+                        <strong id="autoModelName">Otomatik Model: Demucs v4 FT (Fine-Tuned)</strong>
+                        <p id="autoModelDesc">Test-time augmentation (--shifts=2) ve 32-bit float kalitesiyle FL Studio için en net akustik ayrımı yapar.</p>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button class="btn-start" id="btnStart" disabled>
+                    <span class="btn-icon">⚡</span>
+                    <span id="btnStartText">Ayrıştırmayı Başlat</span>
+                </button>
+            </section>
+
+            <!-- Step 3: Progress & Processing -->
+            <section class="card progress-section" id="progressSection" style="display: none;">
+                <div class="card-header">
+                    <div class="step-num">3</div>
+                    <h2>Ayrıştırma Durumu</h2>
+                </div>
+
+                <div class="progress-box">
+                    <div class="progress-top">
+                        <span class="status-msg" id="statusMessage">Ayrıştırma hazırlanıyor...</span>
+                        <span class="status-pct" id="statusPercent">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
+                    </div>
+                    <div class="progress-note">
+                        <span>💡 Kaliteli ve doğru ayrıştırma için 32-bit hassasiyette işlenmektedir. Süre şarkı uzunluğuna göre 20-40 saniye sürebilir.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 4: Results, Preview & Desktop Export -->
+            <section class="card results-section" id="resultsSection" style="display: none;">
+                <div class="card-header results-header">
+                    <div class="header-left">
+                        <div class="step-num step-success">✓</div>
+                        <div>
+                            <h2>Ayrıştırılan Kanallar (FL Studio'ya Hazır)</h2>
+                            <p class="section-desc">Dosyalar şu an bellekte tutuluyor. Dinleyebilir ve doğrudan Masaüstüne aktarabilirsiniz.</p>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-save-desktop" id="btnSaveAllDesktop">
+                            <span>📂</span> Tümünü Masaüstüne Kaydet & Klasörü Aç
+                        </button>
+                        <button class="btn btn-secondary" id="btnResetAll" title="Önbelleği temizle ve yeni şarkı yükle">
+                            <span>🗑️</span> Yeni Şarkı
+                        </button>
+                    </div>
+                </div>
+
+                <div class="saved-banner" id="savedBanner" style="display: none;">
+                    <span class="banner-icon">✅</span>
+                    <div class="banner-text">
+                        <strong>Dosyalar Masaüstüne Kaydedildi:</strong>
+                        <span id="savedFolderPath">C:\Users\tobil\Desktop\Sarki_Stems</span>
+                    </div>
+                    <button class="btn-small" id="btnOpenFolder">Klasörü Aç</button>
+                </div>
+
+                <!-- Stems List -->
+                <div class="stems-list" id="stemsList">
+                    <!-- Populated dynamically -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
