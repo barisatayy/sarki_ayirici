@@ -42,6 +42,7 @@ let selectedFile = null;
 let selectedTargetKey = "vocals_inst";
 let targetsData = { ...DEFAULT_TARGETS };
 let pollInterval = null;
+let ytEventSource = null;
 
 // DOM Elements
 const dropZone = document.getElementById("dropZone");
@@ -70,6 +71,19 @@ const btnResetAll = document.getElementById("btnResetAll");
 const savedBanner = document.getElementById("savedBanner");
 const savedFolderPath = document.getElementById("savedFolderPath");
 const btnOpenFolder = document.getElementById("btnOpenFolder");
+
+// YouTube DOM Elements
+const tabFile = document.getElementById("tabFile");
+const tabYoutube = document.getElementById("tabYoutube");
+const panelFile = document.getElementById("panelFile");
+const panelYoutube = document.getElementById("panelYoutube");
+const ytUrlInput = document.getElementById("ytUrlInput");
+const btnYtDownload = document.getElementById("btnYtDownload");
+const btnYtText = document.getElementById("btnYtText");
+const ytProgressContainer = document.getElementById("ytProgressContainer");
+const ytProgressMsg = document.getElementById("ytProgressMsg");
+const ytProgressPct = document.getElementById("ytProgressPct");
+const ytProgressFill = document.getElementById("ytProgressFill");
 
 // Initialize application
 document.addEventListener("DOMContentLoaded", () => {
@@ -159,6 +173,10 @@ function updateAutoModelBanner() {
 
 // Setup Event Listeners
 function setupEventListeners() {
+    // Source tab switching
+    tabFile.addEventListener("click", () => switchSource("file"));
+    tabYoutube.addEventListener("click", () => switchSource("youtube"));
+
     // Drop zone click
     dropZone.addEventListener("click", () => fileInput.click());
 
@@ -198,6 +216,30 @@ function setupEventListeners() {
         clearSelectedFile();
     });
 
+    // YouTube URL input validation
+    ytUrlInput.addEventListener("input", () => {
+        const url = ytUrlInput.value.trim();
+        btnYtDownload.disabled = !isValidYouTubeUrl(url);
+    });
+
+    // YouTube URL paste auto-detect
+    ytUrlInput.addEventListener("paste", () => {
+        setTimeout(() => {
+            const url = ytUrlInput.value.trim();
+            btnYtDownload.disabled = !isValidYouTubeUrl(url);
+        }, 50);
+    });
+
+    // YouTube Enter key to download
+    ytUrlInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !btnYtDownload.disabled) {
+            startYouTubeDownload();
+        }
+    });
+
+    // YouTube download button
+    btnYtDownload.addEventListener("click", startYouTubeDownload);
+
     // Start Separation
     btnStart.addEventListener("click", startSeparation);
 
@@ -219,11 +261,127 @@ function setupEventListeners() {
     btnResetAll.addEventListener("click", resetAll);
 }
 
+// Source tab switching
+function switchSource(source) {
+    // Don't switch if file is already selected
+    if (selectedFile) return;
+
+    tabFile.classList.toggle("active", source === "file");
+    tabYoutube.classList.toggle("active", source === "youtube");
+    panelFile.classList.toggle("active", source === "file");
+    panelYoutube.classList.toggle("active", source === "youtube");
+}
+
+// YouTube URL validation
+function isValidYouTubeUrl(url) {
+    if (!url) return false;
+    const pattern = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|shorts\/)|youtu\.be\/|music\.youtube\.com\/watch)/;
+    return pattern.test(url);
+}
+
+// Start YouTube download with SSE progress
+function startYouTubeDownload() {
+    const url = ytUrlInput.value.trim();
+    if (!isValidYouTubeUrl(url)) return;
+
+    // Disable input and button during download
+    ytUrlInput.disabled = true;
+    btnYtDownload.disabled = true;
+    btnYtText.textContent = "İndiriliyor...";
+
+    // Show progress bar
+    ytProgressContainer.style.display = "block";
+    updateYtProgress(0, "İndirme başlatılıyor...");
+
+    // Close any previous event source
+    if (ytEventSource) {
+        ytEventSource.close();
+        ytEventSource = null;
+    }
+
+    // Start SSE connection
+    const encodedUrl = encodeURIComponent(url);
+    ytEventSource = new EventSource(`/api/youtube-download?url=${encodedUrl}`);
+
+    ytEventSource.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+
+            updateYtProgress(data.progress || 0, data.message || "");
+
+            if (data.status === "completed") {
+                ytEventSource.close();
+                ytEventSource = null;
+                onYouTubeDownloadComplete(data);
+            } else if (data.status === "error") {
+                ytEventSource.close();
+                ytEventSource = null;
+                onYouTubeDownloadError(data.message);
+            }
+        } catch (err) {
+            console.error("SSE parse error:", err);
+        }
+    };
+
+    ytEventSource.onerror = () => {
+        ytEventSource.close();
+        ytEventSource = null;
+        onYouTubeDownloadError("Bağlantı hatası oluştu.");
+    };
+}
+
+function updateYtProgress(pct, msg) {
+    ytProgressPct.textContent = `%${Math.round(pct)}`;
+    ytProgressMsg.textContent = msg;
+    ytProgressFill.style.width = `${pct}%`;
+}
+
+async function onYouTubeDownloadComplete(data) {
+    updateYtProgress(100, "İndirme tamamlandı! Dosya yükleniyor...");
+
+    try {
+        // Fetch the downloaded file from server and create a File object
+        const response = await fetch("/api/youtube-file");
+        if (!response.ok) throw new Error("Dosya alınamadı");
+
+        const blob = await response.blob();
+        const fileName = data.file_name || "youtube_download.mp3";
+        const file = new File([blob], fileName, { type: "audio/mpeg" });
+
+        // Auto-load as if user manually selected it
+        handleFileSelected(file);
+
+        // Hide YouTube panel and progress
+        ytProgressContainer.style.display = "none";
+
+    } catch (err) {
+        console.error("YouTube file fetch error:", err);
+        onYouTubeDownloadError("İndirilen dosya yüklenemedi: " + err.message);
+    }
+}
+
+function onYouTubeDownloadError(message) {
+    updateYtProgress(0, "Hata: " + message);
+
+    // Re-enable inputs
+    ytUrlInput.disabled = false;
+    btnYtDownload.disabled = false;
+    btnYtText.textContent = "İndir";
+
+    // Keep progress visible so user sees the error
+    setTimeout(() => {
+        ytProgressContainer.style.display = "none";
+    }, 5000);
+}
+
 function handleFileSelected(file) {
     selectedFile = file;
     selectedFileName.textContent = file.name;
     selectedFileSize.textContent = formatBytes(file.size);
 
+    // Hide both panels and show the file card
+    panelFile.classList.remove("active");
+    panelYoutube.classList.remove("active");
     dropZone.style.display = "none";
     selectedFileCard.style.display = "flex";
     btnStart.disabled = false;
@@ -235,6 +393,25 @@ function clearSelectedFile() {
     dropZone.style.display = "block";
     selectedFileCard.style.display = "none";
     btnStart.disabled = true;
+
+    // Reset YouTube state
+    ytUrlInput.value = "";
+    ytUrlInput.disabled = false;
+    btnYtDownload.disabled = true;
+    btnYtText.textContent = "İndir";
+    ytProgressContainer.style.display = "none";
+
+    // Restore active tab panel
+    if (tabYoutube.classList.contains("active")) {
+        panelYoutube.classList.add("active");
+        panelFile.classList.remove("active");
+    } else {
+        // Default to file tab
+        tabFile.classList.add("active");
+        tabYoutube.classList.remove("active");
+        panelFile.classList.add("active");
+        panelYoutube.classList.remove("active");
+    }
 }
 
 // Start Separation API call
@@ -399,6 +576,10 @@ async function saveStemsToDesktop(stemName = null) {
 // Reset all and cleanup memory/temp
 async function resetAll() {
     if (pollInterval) clearInterval(pollInterval);
+    if (ytEventSource) {
+        ytEventSource.close();
+        ytEventSource = null;
+    }
     
     try {
         await fetch("/api/cleanup", { method: "POST" });
@@ -413,6 +594,11 @@ async function resetAll() {
     stemsList.innerHTML = "";
     btnStart.disabled = true;
     btnStartText.textContent = "Ayrıştırmayı Başlat";
+
+    // Reset to default file tab
+    switchSource("file");
+    tabFile.classList.add("active");
+    tabYoutube.classList.remove("active");
 }
 
 function formatBytes(bytes, decimals = 1) {

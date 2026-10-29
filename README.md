@@ -4,25 +4,37 @@ Tamamen yerel, açık kaynaklı ve donanım hızlandırmalı (NVIDIA CUDA) müzi
 
 ---
 
+## Ekran Görüntüleri
+
+![Dosya Yükleme Arayüzü](p1.png)
+
+![YouTube Linki ile İndirme](p2.png)
+
+---
+
 ## Özellikler
 
 - **100% Yerel & Çevrimdışı**: Hiçbir harici API veya bulut servisine bağlanmaz, her şey kendi bilgisayarınızda.
 - **CUDA Hızlandırma**: NVIDIA GPU ile 3-4 dakikalık bir şarkıyı ortalama **20-30 saniyede** ayırır.
 - **Yüksek Kalite Çıktı**: Yüksek çözünürlüklü **320kbps MP3** formatında çıktı üretir.
+- **İki Farklı Giriş Seçeneği (Dosya & YouTube)**:
+  - **Yerel Dosya Yükleme**: Bilgisayarınızdaki ses dosyalarını (MP3, WAV, FLAC, M4A, OGG, AAC) sürükleyip bırakarak veya dosya seçerek yükleyebilirsiniz.
+  - **YouTube Linki ile İndirme**: Herhangi bir YouTube video bağlantısını yapıştırıp doğrudan arayüz üzerinden MP3 olarak indirebilir, anlık indirme ilerlemesini izleyebilir ve ardından ayrıştırmaya başlayabilirsiniz.
 - **Otomatik Model Seçimi**: Seçtiğiniz ayrıştırma hedefine göre en uygun Meta AI Demucs v4 modelini (`htdemucs_ft` veya `htdemucs_6s`) otomatik olarak belirler:
-  -  **Vokal & Altyapı (2 Kanal)**: Şarkıyı Vokal (Acapella) ve temiz Altyapı olarak ayırır.
-  -  **Sadece Davul / Bateri Çıkar (2 Kanal)**: Davul ritimleri ve davulsuz altyapı.
-  -  **Sadece Bas Çıkar (2 Kanal)**: Bas hattı ve bassız şarkı.
-  -  **Sadece Piyano Çıkar (2 Kanal)**: Piyano/klavye ve piyanosuz altyapı.
-  -  **Sadece Gitar Çıkar (2 Kanal)**: Gitar partileri ve gitarsız altyapı.
-  -  **Tüm Temel Enstrümanlar & Vokal (4 Kanal)**: Vokal, Davul, Bas, Diğer.
-  -  **Gitar & Piyano Detaylı (6 Kanal)**: Vokal, Davul, Bas, Gitar, Piyano, Diğer.
+  - **Vokal & Altyapı (2 Kanal)**: Şarkıyı Vokal (Acapella) ve temiz Altyapı olarak ayırır.
+  - **Sadece Davul / Bateri Çıkar (2 Kanal)**: Davul ritimleri ve davulsuz altyapı.
+  - **Sadece Bas Çıkar (2 Kanal)**: Bas hattı ve bassız şarkı.
+  - **Sadece Piyano Çıkar (2 Kanal)**: Piyano/klavye ve piyanosuz altyapı.
+  - **Sadece Gitar Çıkar (2 Kanal)**: Gitar partileri ve gitarsız altyapı.
+  - **Tüm Temel Enstrümanlar & Vokal (4 Kanal)**: Vokal, Davul, Bas, Diğer.
+  - **Gitar & Piyano Detaylı (6 Kanal)**: Vokal, Davul, Bas, Gitar, Piyano, Diğer.
 - **Akıllı Bellek Yönetimi**: Ayrıştırılan dosyalar geçici bellekte tutulur, diskte yer kaplamaz. Yeni şarkı yüklendiğinde öncekiler otomatik temizlenir.
 - **Masaüstüne Tek Tıkla Kayıt**: Ayrıştırılan kanalları doğrudan Masaüstünde klasör oluşturup kaydeder ve klasörü otomatik açar.
+- **Dahili Müzik Çalar**: Ayrıştırılan tüm enstrüman kanallarını tarayıcı üzerinden doğrudan dinleyebilir, ayrı ayrı veya tek bir ZIP paketi halinde indirebilirsiniz.
 
 ---
 
-##  Başlangıç & Çalıştırma
+## Başlangıç & Çalıştırma
 
 ### Gereksinimler
 - Python 3.10+

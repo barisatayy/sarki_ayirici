@@ -1,12 +1,15 @@
 import os
 import sys
+import json
 import shutil
 import atexit
 import subprocess
+import threading
+import re
 from pathlib import Path
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 # Current directory paths
@@ -149,6 +152,160 @@ def open_desktop_folder():
 def cleanup_temp():
     manager.cleanup_previous_job()
     return {"success": True, "message": "Geçici dosyalar ve bellek temizlendi."}
+
+# --- YouTube Download SSE Endpoint ---
+
+# Store latest downloaded file path for serving
+_yt_download_result: dict = {}
+_yt_download_lock = threading.Lock()
+
+
+@app.get("/api/youtube-download")
+async def youtube_download_sse(url: str):
+    """SSE endpoint: downloads YouTube audio as MP3 via yt-dlp, streams progress."""
+    import asyncio
+
+    if not url or not url.strip():
+        return JSONResponse({"error": "URL boş olamaz."}, status_code=400)
+
+    # Validate URL pattern
+    url = url.strip()
+    yt_pattern = re.compile(
+        r'(https?://)?(www\.)?(youtube\.com/(watch\?v=|shorts/)|youtu\.be/|music\.youtube\.com/watch)'
+    )
+    if not yt_pattern.search(url):
+        return JSONResponse({"error": "Geçersiz YouTube linki."}, status_code=400)
+
+    # Prepare temp download directory
+    dl_dir = TEMP_DIR / "yt_download"
+    if dl_dir.exists():
+        shutil.rmtree(dl_dir, ignore_errors=True)
+    dl_dir.mkdir(parents=True, exist_ok=True)
+
+    output_template = str(dl_dir / "%(title)s.%(ext)s")
+
+    async def event_stream():
+        # Build yt-dlp command for best audio -> MP3 conversion
+        cmd = [
+            PYTHON_EXE,
+            "-m", "yt_dlp",
+            "--no-playlist",
+            "--extract-audio",
+            "--audio-format", "mp3",
+            "--audio-quality", "0",
+            "--newline",
+            "--no-warnings",
+            "-o", output_template,
+            url
+        ]
+
+        env = os.environ.copy()
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+            universal_newlines=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env
+        )
+
+        pct_regex = re.compile(r'(\d+\.?\d*)%')
+        title_regex = re.compile(r'\[download\]\s+Destination:\s+(.+)')
+        extracted_title = None
+        all_logs = []
+
+        for line in process.stdout:
+            line_str = line.strip()
+            if not line_str:
+                continue
+
+            all_logs.append(line_str)
+
+            # Extract title from destination line
+            title_match = title_regex.search(line_str)
+            if title_match:
+                dest_path = title_match.group(1)
+                extracted_title = Path(dest_path).stem
+
+            # Extract percentage
+            pct_match = pct_regex.search(line_str)
+            if pct_match:
+                pct = float(pct_match.group(1))
+                # During download phase, map 0-100% to 0-70%
+                mapped = min(70, pct * 0.7)
+                msg = f"İndiriliyor: %{pct:.1f}"
+                data = json.dumps({"progress": round(mapped, 1), "message": msg, "status": "downloading"})
+                yield f"data: {data}\n\n"
+
+            if "[ExtractAudio]" in line_str or "Converting" in line_str:
+                data = json.dumps({"progress": 75, "message": "MP3'e dönüştürülüyor...", "status": "converting"})
+                yield f"data: {data}\n\n"
+
+            if "Deleting original" in line_str or "has already been downloaded" in line_str:
+                data = json.dumps({"progress": 90, "message": "Tamamlanıyor...", "status": "finalizing"})
+                yield f"data: {data}\n\n"
+
+        process.wait()
+
+        if process.returncode != 0:
+            err_detail = "\n".join(all_logs[-5:]) if all_logs else f"Çıkış kodu: {process.returncode}"
+            print(f"[YT-DLP ERROR] {err_detail}")
+            data = json.dumps({"progress": 0, "message": f"İndirme başarısız: {err_detail[:200]}", "status": "error"})
+            yield f"data: {data}\n\n"
+            return
+
+        # Find the downloaded MP3 file
+        mp3_files = list(dl_dir.glob("*.mp3"))
+        if not mp3_files:
+            # Also check for other audio files
+            mp3_files = list(dl_dir.glob("*.m4a")) + list(dl_dir.glob("*.webm")) + list(dl_dir.glob("*.opus"))
+
+        if not mp3_files:
+            data = json.dumps({"progress": 0, "message": "İndirilen dosya bulunamadı.", "status": "error"})
+            yield f"data: {data}\n\n"
+            return
+
+        downloaded_file = mp3_files[0]
+        file_size = downloaded_file.stat().st_size
+        file_name = downloaded_file.name
+
+        # Store result for serving
+        with _yt_download_lock:
+            _yt_download_result["path"] = str(downloaded_file)
+            _yt_download_result["name"] = file_name
+            _yt_download_result["size"] = file_size
+
+        data = json.dumps({
+            "progress": 100,
+            "message": "İndirme tamamlandı!",
+            "status": "completed",
+            "file_name": file_name,
+            "file_size": file_size
+        })
+        yield f"data: {data}\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+@app.get("/api/youtube-file")
+def serve_youtube_file():
+    """Serves the most recently downloaded YouTube MP3 file."""
+    with _yt_download_lock:
+        file_path = _yt_download_result.get("path")
+        file_name = _yt_download_result.get("name", "download.mp3")
+
+    if not file_path or not Path(file_path).exists():
+        raise HTTPException(status_code=404, detail="İndirilmiş dosya bulunamadı.")
+
+    return FileResponse(
+        file_path,
+        media_type="audio/mpeg",
+        filename=file_name
+    )
+
 
 # Mount frontend
 if FRONTEND_DIR.exists():
